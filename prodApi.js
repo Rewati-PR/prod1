@@ -208,23 +208,57 @@ app.get("/totalPurchase/shop/:id", function (req,res){
       if (err) res.status(404).send(err);
       else {
         let obj = JSON.parse(data);
-        let pr1 = obj.purchases.filter(pr=>pr.shopId === id);
-        console.log(pr1.length);
-        res.send(pr1);
+        let filter = obj.purchases.filter((f1)=>f1.shopId===id);
+        console.log("filter",filter);
+        let totalPurchase = filter.reduce((acc,curr)=>{
+         let find = acc.find((f1)=>f1.productId===curr.productid);
+         if(find){
+          let a = [{productId:(curr.productid,find.productId),
+          purchaseId : (curr.purchaseId,find.purchaseId),
+          quantity : curr.quantity+find.quantity,
+          price: curr.price+find.price}]
+          return a;
+         }
+         else{
+          let a = [...acc,{productId:curr.productid,
+            purchaseId : curr.purchaseId,
+            quantity : curr.quantity,
+            price: curr.price}]
+          return a;
+         }
+        },[]);
+        res.send(totalPurchase);
       }
     });
 });
 app.get("/totalPurchase/product/:id", function (req,res){
-    let id = +req.params.id;
-    fs.readFile(fname, "utf8", function (err, data) {
-      if (err) res.status(404).send(err);
-      else {
-        let obj = JSON.parse(data);
-        let pr1 = obj.purchases.filter(pr=>pr.productid === id);
-        console.log(pr1.length);
-        res.send(pr1);
-      }
-    });
+  let id = +req.params.id;
+  fs.readFile(fname, "utf8", function (err, data) {
+    if (err) res.status(404).send(err);
+    else {
+      let obj = JSON.parse(data);
+      let filter = obj.purchases.filter((f1)=>f1.productid===id);
+      console.log("filter",filter);
+      let totalPurchase = filter.reduce((acc,curr)=>{
+       let find = acc.find((f1)=>f1.shopId===curr.shopId);
+       if(find){
+        let a = [{shopId:(curr.shopId,find.shopId),
+        purchaseId : (curr.purchaseId,find.purchaseId),
+        quantity : curr.quantity+find.quantity,
+        price: curr.price+find.price}]
+        return a;
+       }
+       else{
+        let a = [...acc,{shopId:curr.shopId,
+          purchaseId : curr.purchaseId,
+          quantity : curr.quantity,
+          price: curr.price}]
+        return a;
+       }
+      },[]);
+      res.send(totalPurchase);
+    }
+  });
 });
 
 
